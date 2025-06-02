@@ -249,7 +249,7 @@ export default function ContactSection() {
                   Call us
                 </p>
                 <p className="text-white/70 font-bold text-2xl">
-                  +256 0760100320
+                  +256760100320
                 </p>
               </div>
               <div className="flex flex-col space-y-2">
