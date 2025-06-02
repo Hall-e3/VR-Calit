@@ -241,7 +241,7 @@ export default function ContactSection() {
                   Write us
                 </p>
                 <p className="text-white/70 font-bold text-2xl">
-                  contact@vinode.io
+                  kymatostechnologies@gmail.com
                 </p>
               </div>
               <div className="flex flex-col space-y-2">
@@ -249,7 +249,7 @@ export default function ContactSection() {
                   Call us
                 </p>
                 <p className="text-white/70 font-bold text-2xl">
-                  +48 692 223 170
+                  +256 0760100320
                 </p>
               </div>
               <div className="flex flex-col space-y-2">
@@ -257,7 +257,8 @@ export default function ContactSection() {
                   Address
                 </p>
                 <address className="text-white/70 font-bold text-2xl not-italic">
-                  05-420, Józefów, Tadeusza 22
+                  Kampala Serena Conference Center, Suite 348. P.O.Box 162672.
+                  Kampala, Uganda.
                 </address>
               </div>
             </div>
