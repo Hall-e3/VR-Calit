@@ -1,10 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
+import emailjs from "@emailjs/browser";
 
 interface FormInputProps {
   label: string;
   value: string;
-  onChange: (value: string) => void;
+  name: string;
+  onChange: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => void;
   placeholder: string;
   type?: string;
   required?: boolean;
@@ -16,6 +20,7 @@ const FormInput: React.FC<FormInputProps> = ({
   value,
   onChange,
   placeholder,
+  name,
   type = "text",
   required = false,
   error,
@@ -23,9 +28,10 @@ const FormInput: React.FC<FormInputProps> = ({
   <div className="flex flex-col space-y-2">
     <input
       id={label}
+      name={name}
       type={type}
       value={value}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={onChange}
       placeholder={placeholder}
       className={twMerge(
         "w-full border-b border-white/40 focus:outline-none focus:border-white/70 py-2 text-white",
@@ -47,14 +53,16 @@ const FormTextarea: React.FC<FormInputProps> = ({
   value,
   onChange,
   placeholder,
+  name,
   required = false,
   error,
 }) => (
   <div className="flex flex-col space-y-2">
     <textarea
       id={label}
+      name={name}
       value={value}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={onChange}
       placeholder={placeholder}
       rows={4}
       className={twMerge(
@@ -73,18 +81,28 @@ const FormTextarea: React.FC<FormInputProps> = ({
 );
 
 export default function ContactSection() {
-  const [email, setEmail] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [company, setCompany] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [message, setMessage] = useState("");
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
   const [status, setStatus] = useState<
     "idle" | "submitting" | "success" | "error"
   >("idle");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [values, setValues] = useState({
+    email: "",
+    firstName: "",
+    lastName: "",
+    company: "",
+    phoneNumber: "",
+    message: "",
+    subject: "",
+  });
+
+  useEffect(() => {
+    emailjs.init("vuJFdIr4h2PRxJACG");
+  }, []);
 
   const validateForm = () => {
+    const { email, firstName, message, phoneNumber } = values;
     const newErrors: Partial<Record<string, string>> = {};
     if (!email) {
       newErrors.email = "Email is required";
@@ -100,30 +118,59 @@ export default function ContactSection() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-
-    setStatus("submitting");
-    try {
-      // Mock API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setStatus("success");
-      setEmail("");
-      setFirstName("");
-      setLastName("");
-      setCompany("");
-      setPhoneNumber("");
-      setMessage("");
-      setErrors({});
-    } catch {
-      setStatus("error");
-    }
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setValues((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleBookCall = () => {
-    // Mock action: Open a calendar link or external booking system
     window.open("https://calendly.com/example", "_blank");
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    setLoading(true);
+    setStatus("submitting");
+
+    const serviceId = "service_d2jezqk";
+    const templateId = "template_y7in2pe";
+
+    try {
+      await emailjs.send(serviceId, templateId, {
+        user_name: `${values.firstName} ${values.lastName}`,
+        user_email: values.email,
+        subject: values.subject || "New Message",
+        message: values.message,
+        phone: values.phoneNumber,
+        company: values.company,
+      });
+
+      setStatus("success");
+      setMessage("Your message has been sent successfully!");
+      setValues({
+        email: "",
+        firstName: "",
+        lastName: "",
+        company: "",
+        phoneNumber: "",
+        message: "",
+        subject: "",
+      });
+    } catch (error) {
+      console.error("Email send error:", error);
+      setStatus("error");
+      setMessage("Failed to send email. Please try again later.");
+    } finally {
+      setLoading(false);
+      setTimeout(() => setMessage(null), 3000);
+    }
   };
 
   return (
@@ -133,21 +180,19 @@ export default function ContactSection() {
           Let's talk!
         </h2>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
-          {/* LEFT SIDE: FORM */}
           <div className="flex flex-col space-y-5">
-            <div className="flex flex-col space-y-5">
-              <p className="uppercase font-semibold text-md text-white/40">
-                Send the email
-              </p>
-            </div>
+            <p className="uppercase font-semibold text-md text-white/40">
+              Send the email
+            </p>
             <form
               onSubmit={handleSubmit}
               className="text-white flex flex-col space-y-10"
             >
               <FormInput
                 label="Email"
-                value={email}
-                onChange={setEmail}
+                name="email"
+                value={values.email}
+                onChange={handleInputChange}
                 placeholder="Email"
                 type="email"
                 required
@@ -156,16 +201,18 @@ export default function ContactSection() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormInput
                   label="First name"
-                  value={firstName}
-                  onChange={setFirstName}
+                  name="firstName"
+                  value={values.firstName}
+                  onChange={handleInputChange}
                   placeholder="First name"
                   required
                   error={errors.firstName}
                 />
                 <FormInput
                   label="Last name"
-                  value={lastName}
-                  onChange={setLastName}
+                  name="lastName"
+                  value={values.lastName}
+                  onChange={handleInputChange}
                   placeholder="Last name"
                   error={errors.lastName}
                 />
@@ -173,15 +220,17 @@ export default function ContactSection() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormInput
                   label="Company"
-                  value={company}
-                  onChange={setCompany}
+                  name="company"
+                  value={values.company}
+                  onChange={handleInputChange}
                   placeholder="Company"
                   error={errors.company}
                 />
                 <FormInput
                   label="Phone number"
-                  value={phoneNumber}
-                  onChange={setPhoneNumber}
+                  name="phoneNumber"
+                  value={values.phoneNumber}
+                  onChange={handleInputChange}
                   placeholder="Phone number"
                   type="tel"
                   error={errors.phoneNumber}
@@ -189,8 +238,9 @@ export default function ContactSection() {
               </div>
               <FormTextarea
                 label="Message"
-                value={message}
-                onChange={setMessage}
+                name="message"
+                value={values.message}
+                onChange={handleInputChange}
                 placeholder="Tell us about your project"
                 required
                 error={errors.message}
@@ -200,13 +250,13 @@ export default function ContactSection() {
                   type="submit"
                   className={twMerge(
                     "w-full bg-white/80 text-black font-bold py-5 sm:py-3 px-8 rounded-4xl sm:rounded-3xl hover:bg-white transition cursor-pointer",
-                    status === "submitting" && "opacity-50 cursor-not-allowed"
+                    loading && "opacity-50 cursor-not-allowed"
                   )}
-                  disabled={status === "submitting"}
+                  disabled={loading}
                   aria-label="Submit form"
                 >
                   <p className="font-semibold tracking-wide text-sm">
-                    {status === "submitting" ? "SENDING..." : "SEND"}
+                    {loading ? "SENDING..." : "SEND"}
                   </p>
                 </button>
                 <button
@@ -220,14 +270,13 @@ export default function ContactSection() {
                   </p>
                 </button>
               </div>
-              {status === "success" && (
-                <p className="text-green-500 text-sm">
-                  Your message has been sent successfully!
-                </p>
-              )}
-              {status === "error" && (
-                <p className="text-red-500 text-sm">
-                  An error occurred. Please try again later.
+              {message && (
+                <p
+                  className={`text-sm ${
+                    status === "success" ? "text-green-500" : "text-red-500"
+                  }`}
+                >
+                  {message}
                 </p>
               )}
             </form>
@@ -264,11 +313,7 @@ export default function ContactSection() {
             </div>
             <p className="text-white/40 text-xs tracking-tight">
               By submitting this form, you consent to your data being sent to
-              contact@vinode.io for review by authorized personnel. We aim to
-              respond promptly. To retract your data or if the form was
-              submitted in error, please email contact@vinode.io. We maintain
-              strict privacy standards and will not share your data with third
-              parties or send unsolicited messages.
+              contact@vinode.io for review by authorized personnel...
             </p>
           </div>
         </div>
