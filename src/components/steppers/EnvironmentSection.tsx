@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   EnvironmentIcon,
   EnvironmentOneIcon,
@@ -10,68 +9,69 @@ import {
   NeighborhoodThreeIcon,
 } from "../../assets/icons";
 import { twMerge } from "tailwind-merge";
-
-const ApartmentType = {
-  Needs: "need_models",
-  Has: "has_models",
-} as const;
-
-type ApartmentType = (typeof ApartmentType)[keyof typeof ApartmentType];
+import { useCalculator } from "../../context/CalculatorContext";
 
 type EnvironmentTypeValue =
-  | "single_house"
-  | "multiple_house"
-  | "single_apartment"
-  | "multiple_apartment";
+  | "basic"
+  | "grass_trees"
+  | "detailed"
+  | "photogrammetry";
+
+type NeighborhoodTypeValue =
+  | "neighborhood-basic"
+  | "neighborhood_grass_trees"
+  | "neighborhood_detailed"
+  | "neighborhood_photogrammetry";
+
 type FileFormat =
   | "unreal_engine"
   | "3d_max_blender_corona"
   | "sketchfab_autocad"
   | null;
 
-const environmentTypes = [
+const plotOptions = [
   {
-    value: "single_house" as EnvironmentTypeValue,
+    value: "basic" as EnvironmentTypeValue,
     label: "Just basic plan & plot plan as a ground",
     icon: <EnvironmentIcon className="size-25" />,
   },
   {
-    value: "multiple_house" as EnvironmentTypeValue,
+    value: "grass_trees" as EnvironmentTypeValue,
     label: "Plot with grass, couple trees and basic neighborhood",
     icon: <EnvironmentOneIcon className="size-25" />,
   },
   {
-    value: "single_apartment" as EnvironmentTypeValue,
+    value: "detailed" as EnvironmentTypeValue,
     label:
       "Detailed plot with gardens, sidewalks, fences & detailed neighborhood blocks",
     icon: <EnvironmentTwoIcon className="size-25" />,
   },
   {
-    value: "multiple_apartment" as EnvironmentTypeValue,
+    value: "photogrammetry" as EnvironmentTypeValue,
     label: "Fully detailed environment based on photogrammetry",
     icon: <EnvironmentThreeIcon className="size-25" />,
   },
 ];
 
-const neighborhoodTypes = [
+const neighborhoodOptions = [
   {
-    value: "single_house" as EnvironmentTypeValue,
+    value: "neighborhood_basic" as NeighborhoodTypeValue,
     label: "Just basic plan & plot plan as a ground",
     icon: <NeighborhoodIcon className="size-25" />,
   },
   {
-    value: "multiple_house" as EnvironmentTypeValue,
+    value: "neighborhood_grass_trees" as NeighborhoodTypeValue,
     label: "Plot with grass, couple trees and basic neighborhood",
     icon: <NeighborhoodOneIcon className="size-25" />,
   },
   {
-    value: "single_apartment" as EnvironmentTypeValue,
+    value: "neighborhood_detailed" as NeighborhoodTypeValue,
     label:
       "Detailed plot with gardens, sidewalks, fences & detailed neighborhood blocks",
     icon: <NeighborhoodTwoIcon className="size-25" />,
   },
   {
-    value: "multiple_apartment" as EnvironmentTypeValue,
+    value: "neighborhood_photogrammetry" as NeighborhoodTypeValue,
     label: "Fully detailed environment based on photogrammetry",
     icon: <NeighborhoodThreeIcon className="size-25" />,
   },
@@ -162,12 +162,16 @@ const SelectableCard = ({
 );
 
 export default function EnvironmentSection() {
-  const [has3DModels, setHas3DModels] = useState<ApartmentType | null>(null);
-  const [fileFormat, setFileFormat] = useState<FileFormat>(null);
-  const [environmentSelection, setEnvironmentSelection] =
-    useState<EnvironmentTypeValue | null>(null);
-  const [neighborhoodSelection, setNeighborhoodSelection] =
-    useState<EnvironmentTypeValue | null>(null);
+  const {
+    hasEnvironmentModel,
+    setHasEnvironmentModel,
+    plotDetail,
+    setPlotDetail,
+    fileFormat,
+    setFileFormat,
+    neighborhoodDetail,
+    setNeighborhoodDetail,
+  } = useCalculator();
 
   return (
     <div className="max-w-3xl mx-auto space-y-8 py-10">
@@ -183,26 +187,19 @@ export default function EnvironmentSection() {
         <div className="space-y-2">
           <RadioCard
             label="Yes, I have my own environment model that I want to use"
-            selected={has3DModels === ApartmentType.Has}
-            onClick={() => {
-              setHas3DModels(ApartmentType.Has);
-              setEnvironmentSelection(null);
-              setNeighborhoodSelection(null);
-            }}
+            selected={hasEnvironmentModel === true}
+            onClick={() => setHasEnvironmentModel(true)}
           />
           <RadioCard
             label="No, I don't have a model and I want you to create one for me"
-            selected={has3DModels === ApartmentType.Needs}
-            onClick={() => {
-              setHas3DModels(ApartmentType.Needs);
-              setFileFormat(null);
-            }}
+            selected={hasEnvironmentModel === false}
+            onClick={() => setHasEnvironmentModel(false)}
           />
         </div>
       </div>
 
       {/* If they have models, ask format */}
-      {has3DModels === ApartmentType.Has && (
+      {hasEnvironmentModel && (
         <div className="bg-[#1c1c1c] backdrop-blur-sm p-3 sm:p-6 rounded-md space-y-4">
           <h2 className="font-bold text-white text-md">
             Select the file format used for your 3D models
@@ -221,20 +218,20 @@ export default function EnvironmentSection() {
       )}
 
       {/* If they don't have models, ask how detailed */}
-      {has3DModels === ApartmentType.Needs && (
+      {!hasEnvironmentModel && (
         <>
           <div className="bg-[#1c1c1c] backdrop-blur-sm p-4 sm:p-8 rounded-md space-y-4">
             <h2 className="font-bold text-white text-md">
               How detailed should the **plot** be?
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {environmentTypes.map((item) => (
+              {plotOptions.map((item) => (
                 <SelectableCard
                   key={item.value}
                   icon={item.icon}
                   label={item.label}
-                  selected={environmentSelection === item.value}
-                  onClick={() => setEnvironmentSelection(item.value)}
+                  selected={plotDetail === item.value}
+                  onClick={() => setPlotDetail(item.value)}
                 />
               ))}
             </div>
@@ -245,13 +242,13 @@ export default function EnvironmentSection() {
               How detailed should the **neighborhood** be?
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {neighborhoodTypes.map((item) => (
+              {neighborhoodOptions.map((item) => (
                 <SelectableCard
                   key={item.value}
                   icon={item.icon}
                   label={item.label}
-                  selected={neighborhoodSelection === item.value}
-                  onClick={() => setNeighborhoodSelection(item.value)}
+                  selected={neighborhoodDetail === item.value}
+                  onClick={() => setNeighborhoodDetail(item.value)}
                 />
               ))}
             </div>

@@ -1,4 +1,5 @@
 import { twMerge } from "tailwind-merge";
+import { useCalculator } from "../context/CalculatorContext";
 
 interface BuildingStepProps {
   activeSection: string | null;
@@ -6,18 +7,107 @@ interface BuildingStepProps {
   onStepClick: (sectionId: string) => void;
 }
 
-const steps = [
-  { label: "BUILDINGS", sectionId: "buildings", price: "$0" },
-  { label: "APARTMENTS", sectionId: "apartments", price: "$0" },
-  { label: "ENVIRONMENT", sectionId: "environment", price: "$0" },
-  { label: "WEBSITE", sectionId: "website", price: "$450" },
-];
-
 const BuildingStep: React.FC<BuildingStepProps> = ({
   activeSection,
   progress,
   onStepClick,
 }) => {
+  const {
+    selectedInvestment,
+    hasBuildingModels,
+    amenities,
+    needsApartmentModels,
+    overallApartments,
+    uniqueApartments,
+    averageRooms,
+    hasEnvironmentModel,
+    plotDetail,
+    highlightAnimation,
+    filteringSorting,
+    languages,
+    heroAnimation,
+  } = useCalculator();
+
+  function calculateBuildingsPrice() {
+    let price = 0;
+
+    // Investment type price
+    if (selectedInvestment === "single_house") price += 450;
+    else if (selectedInvestment === "multiple_house") price += 375;
+    else if (
+      selectedInvestment === "single_apartment" ||
+      selectedInvestment === "multiple_apartment"
+    )
+      price += 750;
+
+    // Documentation price
+    if (hasBuildingModels === false) price += 1350;
+    else if (hasBuildingModels === true) price += 1050;
+
+    // Amenities price
+    if (amenities) price += 300;
+
+    return price;
+  }
+
+  function calculateEnvironmentPrice() {
+    if (hasEnvironmentModel === true) return 0;
+
+    let price = 30; // Base creation fee
+
+    // Plot detail price
+    if (plotDetail === "grass_trees") price += 630;
+    else if (plotDetail === "detailed") price += 930;
+    else if (plotDetail === "photogrammetry") price += 1230;
+
+    return price;
+  }
+
+  function calculateWebsitePrice() {
+    let price = 0;
+
+    if (highlightAnimation) price += 60;
+    if (filteringSorting) price += 660;
+    if (languages > 0) price += languages * 450;
+    if (heroAnimation === "time_lapse") price += 1200;
+    else if (heroAnimation === "close_up") price += 600;
+
+    return price;
+  }
+
+  function calculateApartmentsPrice() {
+    if (!needsApartmentModels) return 0;
+
+    let price = 300; // Base 3D representation cost
+    price += overallApartments * 15;
+    price += uniqueApartments * 300;
+    price += averageRooms * 300;
+
+    return price;
+  }
+
+  const stepPrices = {
+    buildings: calculateBuildingsPrice(),
+    apartments: calculateApartmentsPrice(),
+    environment: calculateEnvironmentPrice(),
+    website: calculateWebsitePrice(),
+  };
+
+  const steps = [
+    { label: "BUILDINGS", sectionId: "buildings", price: stepPrices.buildings },
+    {
+      label: "APARTMENTS",
+      sectionId: "apartments",
+      price: stepPrices.apartments,
+    },
+    {
+      label: "ENVIRONMENT",
+      sectionId: "environment",
+      price: stepPrices.environment,
+    },
+    { label: "WEBSITE", sectionId: "website", price: stepPrices.website },
+  ];
+
   // Determine the active index
   const activeIndex = steps.findIndex(
     (step) => step.sectionId === activeSection

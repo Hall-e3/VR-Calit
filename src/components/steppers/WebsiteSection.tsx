@@ -1,6 +1,6 @@
-import { useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { Minus, Plus, HelpCircle } from "lucide-react";
+import { useCalculator } from "../../context/CalculatorContext";
 
 interface ToggleSwitchProps {
   label: string;
@@ -156,16 +156,16 @@ const ConfigItem = ({
 };
 
 export default function WebsiteSection() {
-  const [has3DModels, setHas3DModels] = useState<
-    "have_models" | "need_models" | null
-  >(null);
-  const [highlightAnimation, setHighlightAnimation] = useState(false);
-  const [filteringSorting, setFilteringSorting] = useState(false);
-  const [languages, setLanguages] = useState(0);
-
-  const handle3DModelsChange = (value: "have_models" | "need_models") => {
-    setHas3DModels(value);
-  };
+  const {
+    highlightAnimation,
+    setHighlightAnimation,
+    filteringSorting,
+    setFilteringSorting,
+    languages,
+    setLanguages,
+    heroAnimation,
+    setHeroAnimation,
+  } = useCalculator();
 
   return (
     <div className="max-w-3xl mx-auto space-y-0 py-10">
@@ -192,13 +192,13 @@ export default function WebsiteSection() {
           <div className="space-y-2">
             <RadioCard
               label="Time lapse"
-              selected={has3DModels === "have_models"}
-              onClick={() => handle3DModelsChange("have_models")}
+              selected={heroAnimation === "time_lapse"}
+              onClick={() => setHeroAnimation("time_lapse")}
             />
             <RadioCard
               label="Close up"
-              selected={has3DModels === "need_models"}
-              onClick={() => handle3DModelsChange("need_models")}
+              selected={heroAnimation === "close_up"}
+              onClick={() => setHeroAnimation("close_up")}
             />
           </div>
         </div>

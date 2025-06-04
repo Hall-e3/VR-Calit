@@ -1,12 +1,16 @@
 import { DownloadIcon } from "../assets/icons";
+import { useCalculator } from "../context/CalculatorContext";
 
 export default function ResultSection() {
+  const { totalPrice } = useCalculator();
   return (
     <section className="bg-white/5 backdrop-blur-sm px-6 py-6 w-full">
       <div className="max-w-4xl mx-auto flex items-center justify-between relative">
         <div>
           <h3 className="text-white/40 text-2xl tracking-wide">Total</h3>
-          <p className="text-2xl sm:text-5xl font-bold text-white">$900</p>
+          <p className="text-2xl sm:text-5xl font-bold text-white">
+            ${totalPrice}
+          </p>
         </div>
         <div>
           <button

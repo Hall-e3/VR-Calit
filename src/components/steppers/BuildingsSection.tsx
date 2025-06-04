@@ -1,14 +1,13 @@
-import { useState } from "react";
 import { Icon, IconOne, IconTwo, IconThree } from "../../assets/icons";
 import { twMerge } from "tailwind-merge";
 import { Minus, Plus, HelpCircle } from "lucide-react";
+import { useCalculator } from "../../context/CalculatorContext";
 
 type InvestmentType =
   | "single_house"
   | "multiple_house"
   | "single_apartment"
   | "multiple_apartment";
-type ModelStatus = "have_models" | "need_models" | null;
 
 const investmentTypes = [
   {
@@ -33,6 +32,17 @@ const investmentTypes = [
   },
 ];
 
+const documentationTypes = [
+  {
+    value: "plans_materials",
+    label: "2D plans & materials examples",
+  },
+  {
+    value: "plans_visualizations",
+    label: "2D plans & visualizations",
+  },
+];
+
 const SelectableCard = ({
   icon,
   label,
@@ -50,8 +60,8 @@ const SelectableCard = ({
     className={twMerge(
       "w-full sm:max-w-sm h-32 flex justify-center space-x-10 p-4 rounded-lg border relative cursor-pointer",
       selected
-        ? "border-white bg-white/10"
-        : "border-white/10 hover:border-white/30 focus:ring-2 focus:ring-white/50"
+        ? "border-white/30 bg-white/10"
+        : "border-white/10 hover:border-white/30 focus:ring-2 "
     )}
     role="radio"
     aria-checked={selected}
@@ -121,17 +131,9 @@ const ConfigItem = ({
   tooltip: string;
   maxValue?: number;
 }) => {
-  const handleDecrement = () => {
-    if (value > 0) {
-      onChange(value - 1);
-    }
-  };
-
-  const handleIncrement = () => {
-    if (maxValue === undefined || value < maxValue) {
-      onChange(value + 1);
-    }
-  };
+  const handleDecrement = () => onChange(Math.max(0, value - 1));
+  const handleIncrement = () =>
+    onChange(maxValue ? Math.min(maxValue, value + 1) : value + 1);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = parseInt(e.target.value) || 0;
@@ -193,20 +195,20 @@ const ConfigItem = ({
 };
 
 export default function BuildingsSection() {
-  const [amenities, setAmenities] = useState<boolean>(false);
-  const [has3DModels, setHas3DModels] = useState<ModelStatus>(null);
-  const [uniqueBuildings, setUniqueBuildings] = useState<number>(1);
-  const [overallBuildings, setOverallBuildings] = useState<number>(1);
-  const [selectedInvestment, setSelectedInvestment] =
-    useState<InvestmentType | null>(null);
-
-  const handleInvestmentChange = (value: InvestmentType) => {
-    setSelectedInvestment(value);
-    if (value !== "multiple_house" && value !== "multiple_apartment") {
-      setUniqueBuildings(1);
-      setOverallBuildings(1);
-    }
-  };
+  const {
+    selectedInvestment,
+    setSelectedInvestment,
+    hasBuildingModels,
+    setHasBuildingModels,
+    amenities,
+    setAmenities,
+    overallBuildings,
+    setOverallBuildings,
+    uniqueBuildings,
+    setUniqueBuildings,
+    documentationType,
+    setDocumentationType,
+  } = useCalculator();
 
   return (
     <div className="max-w-3xl mx-auto space-y-8 py-10">
@@ -226,7 +228,7 @@ export default function BuildingsSection() {
                 icon={item.icon}
                 label={item.label}
                 selected={selectedInvestment === item.value}
-                onClick={() => handleInvestmentChange(item.value)}
+                onClick={() => setSelectedInvestment(item.value)}
               />
             ))}
           </div>
@@ -238,14 +240,9 @@ export default function BuildingsSection() {
             <ConfigItem
               label="Overall number of buildings"
               value={overallBuildings}
-              onChange={(value) => {
-                setOverallBuildings(value);
-                if (value < uniqueBuildings) {
-                  setUniqueBuildings(value);
-                }
-              }}
+              onChange={setOverallBuildings}
               tooltip="Total number of buildings in the project"
-              maxValue={100} // Arbitrary max limit
+              maxValue={100}
             />
             <ConfigItem
               label="Number of unique buildings"
@@ -265,16 +262,34 @@ export default function BuildingsSection() {
             <div className="space-y-1">
               <RadioCard
                 label="Yes, I have 3D models of the building"
-                selected={has3DModels === "have_models"}
-                onClick={() => setHas3DModels("have_models")}
+                selected={hasBuildingModels === true}
+                onClick={() => setHasBuildingModels(true)}
               />
               <RadioCard
                 label="No, I need to create 3D models from the ground up"
-                selected={has3DModels === "need_models"}
-                onClick={() => setHas3DModels("need_models")}
+                selected={hasBuildingModels === false}
+                onClick={() => setHasBuildingModels(false)}
               />
             </div>
           </div>
+
+          {hasBuildingModels !== null && (
+            <div className="bg-[#1c1c1c] backdrop-blur-sm p-6 rounded-md space-y-4">
+              <h2 className="font-bold text-white text-md">
+                What kind of documentation do you use?
+              </h2>
+              <div className="space-y-2">
+                {documentationTypes.map((doc) => (
+                  <RadioCard
+                    key={doc.value}
+                    label={doc.label}
+                    selected={documentationType === doc.value}
+                    onClick={() => setDocumentationType(doc.value)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="bg-[#1c1c1c] backdrop-blur-sm p-3 sm:p-6 rounded-md flex items-center justify-between">
             <div className="flex items-center gap-2">

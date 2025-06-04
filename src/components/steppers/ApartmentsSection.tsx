@@ -1,6 +1,6 @@
-import { useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { Minus, Plus, HelpCircle } from "lucide-react";
+import { useCalculator } from "../../context/CalculatorContext";
 
 export const ApartmentType = {
   Needs: "need_models",
@@ -128,19 +128,16 @@ const ConfigItem = ({
 };
 
 export default function ApartmentsSection() {
-  const [averageRooms, setAverageRooms] = useState<number>(1);
-  const [uniqueApartments, setUniqueApartments] = useState<number>(1);
-  const [has3DModels, setHas3DModels] = useState<ApartmentType | null>(null);
-  const [overallApartments, setOverallApartments] = useState<number>(1);
-
-  const handle3DModelsChange = (value: ApartmentType) => {
-    setHas3DModels(value);
-    if (value === ApartmentType.Has) {
-      setOverallApartments(1);
-      setUniqueApartments(1);
-      setAverageRooms(1);
-    }
-  };
+  const {
+    needsApartmentModels,
+    setNeedsApartmentModels,
+    overallApartments,
+    setOverallApartments,
+    uniqueApartments,
+    setUniqueApartments,
+    averageRooms,
+    setAverageRooms,
+  } = useCalculator();
 
   return (
     <div className="max-w-3xl mx-auto space-y-8 py-10">
@@ -156,17 +153,17 @@ export default function ApartmentsSection() {
           <div className="flex flex-col space-y-1">
             <RadioCard
               label="Yes, I need 3D visualizations of the apartments"
-              selected={has3DModels === ApartmentType.Needs}
-              onClick={() => handle3DModelsChange(ApartmentType.Needs)}
+              selected={needsApartmentModels === true}
+              onClick={() => setNeedsApartmentModels(true)}
             />
             <RadioCard
               label="No, I don't need 3D visualizations of apartments"
-              selected={has3DModels === ApartmentType.Has}
-              onClick={() => handle3DModelsChange(ApartmentType.Has)}
+              selected={needsApartmentModels === false}
+              onClick={() => setNeedsApartmentModels(false)}
             />
           </div>
         </div>
-        {has3DModels === ApartmentType.Needs && (
+        {needsApartmentModels && (
           <div className="flex flex-col space-y-1">
             <ConfigItem
               label="Overall number of apartments"
