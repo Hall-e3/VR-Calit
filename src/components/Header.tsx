@@ -12,15 +12,22 @@ export default function Header({
       <nav className="max-w-[1460px] mx-auto z-50 h-auto">
         <div className="w-full flex justify-between items-center p-4">
           <div className="flex items-center space-x-3">
-            <div className="h-10 w-10 rounded-full">
+            <div
+              onClick={() => {
+                window.location.href = "/";
+              }}
+              className="h-12 w-12 rounded-full cursor-pointer"
+            >
               <img
                 src="/logo.png"
                 alt="Kymatos Logo"
-                className="w-full h-full"
+                className="w-full h-full object-contain"
                 loading="lazy"
               />
             </div>
-            <span className="text-xl font-bold  text-white">Kymatos</span>
+            <span className="text-xl font-bold  text-white">
+              Kymatos Technologies
+            </span>
           </div>
           <ul className="space-x-6 hidden">
             {["About", "Pricing", "FAQ", "Blog", "Calculator"].map((link) => (
