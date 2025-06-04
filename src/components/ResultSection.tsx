@@ -8,7 +8,6 @@ const ResultSection: React.FC = () => {
   const { totalPrice } = useCalculator();
   const [isGenerating, setIsGenerating] = useState(false);
 
-  // Handle click to start generating
   const handleClick = () => {
     setIsGenerating(true);
   };
@@ -22,7 +21,7 @@ const ResultSection: React.FC = () => {
             ${totalPrice.toFixed(2)}
           </p>
         </div>
-        <div>
+        <div className="hidden">
           {isGenerating ? (
             <button className="flex items-center space-x-2 bg-white/80 rounded-3xl px-6 py-3 cursor-not-allowed">
               <span className="font-bold text-xs text-black tracking-wide">
