@@ -200,7 +200,7 @@ const BuildingStep: React.FC<BuildingStepProps> = ({
                   : "text-white/40"
               )}
             >
-              {step.price}
+              ${step.price}
             </span>
           </div>
         ))}

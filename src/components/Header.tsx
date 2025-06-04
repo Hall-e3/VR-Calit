@@ -1,16 +1,26 @@
 import { useState } from "react";
 
-export default function Header() {
+export default function Header({
+  onContactClick,
+}: {
+  onContactClick: () => void;
+}) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
     <header className="bg-black/80 text-white px-4 sm:px-6 fixed top-0 left-0 w-full z-50">
       <nav className="max-w-[1460px] mx-auto z-50 h-auto">
         <div className="w-full flex justify-between items-center p-4">
-          <div className="flex items-center">
-            <span className="text-xl font-bold mr-2 text-white">
-              Kymatos Custom Price Calculator
-            </span>
+          <div className="flex items-center space-x-3">
+            <div className="h-10 w-10 rounded-full">
+              <img
+                src="/logo.png"
+                alt="Kymatos Logo"
+                className="w-full h-full"
+                loading="lazy"
+              />
+            </div>
+            <span className="text-xl font-bold  text-white">Kymatos</span>
           </div>
           <ul className="space-x-6 hidden">
             {["About", "Pricing", "FAQ", "Blog", "Calculator"].map((link) => (
@@ -51,7 +61,11 @@ export default function Header() {
               )}
             </svg>
           </button>
-          <button className="uppercase hidden sm:block tracking-wide text-white font-semibold text-sm border-[2px] border-white/40 rounded-full px-6 py-3 hover:bg-white hover:text-[#1a1a1a] transition-colors">
+          <button
+            type="button"
+            onClick={onContactClick}
+            className="cursor-pointer uppercase hidden sm:block tracking-wide text-white font-semibold text-sm border-[2px] border-white/40 rounded-full px-6 py-3 hover:bg-white hover:text-[#1a1a1a] transition-colors"
+          >
             Contact Us
           </button>
         </div>
@@ -71,7 +85,11 @@ export default function Header() {
                 </li>
               ))}
               <li>
-                <button className="w-full uppercase tracking-wide text-white font-semibold text-sm border-[2px] border-white/40 rounded-full px-6 py-3 hover:bg-white hover:text-[#1a1a1a] transition-colors">
+                <button
+                  type="button"
+                  className="w-full uppercase tracking-wide text-white font-semibold text-sm border-[2px] border-white/40 rounded-full px-6 py-3 hover:bg-white hover:text-[#1a1a1a] transition-colors"
+                  onClick={onContactClick}
+                >
                   Contact Us
                 </button>
               </li>

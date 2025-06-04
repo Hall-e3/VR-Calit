@@ -25,6 +25,7 @@ function App() {
     apartments: null,
     environment: null,
     website: null,
+    contact: null,
   });
 
   const handleScrollToSection = (sectionId: string) => {
@@ -130,7 +131,7 @@ function App() {
   return (
     <CalculatorProvider>
       <div className="min-h-screen w-full bg-black/90">
-        <Header />
+        <Header onContactClick={() => handleScrollToSection("contact")} />
         <HeroSection />
         <BuildingStep
           progress={progress}
@@ -176,7 +177,15 @@ function App() {
           </div>
         </main>
         <ResultSection />
-        <ContactSection />
+        <div
+          id="contact"
+          ref={(el) => {
+            sectionRefs.current.contact = el;
+          }}
+          className="scroll-mt-32 "
+        >
+          <ContactSection />
+        </div>
       </div>
     </CalculatorProvider>
   );
