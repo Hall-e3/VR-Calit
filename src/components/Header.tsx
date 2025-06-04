@@ -8,9 +8,11 @@ export default function Header() {
       <nav className="max-w-[1460px] mx-auto z-50 h-auto">
         <div className="w-full flex justify-between items-center p-4">
           <div className="flex items-center">
-            <span className="text-xl font-bold mr-2 text-white">VR Calit</span>
+            <span className="text-xl font-bold mr-2 text-white">
+              Kymatos Custom Price Calculator
+            </span>
           </div>
-          <ul className="space-x-6 hidden sm:flex">
+          <ul className="space-x-6 hidden">
             {["About", "Pricing", "FAQ", "Blog", "Calculator"].map((link) => (
               <li key={link}>
                 <a
